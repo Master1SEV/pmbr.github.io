@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Post My Bike Route </title>
+    <style>
+        :root {
+            --tg-theme-bg-color: var(--tg-bg-color, #ffffff);
+            --tg-theme-text-color: var(--tg-text-color, #000000);
+            --tg-theme-button-color: var(--tg-button-color, #007aff);
+            --tg-theme-button-text-color: var(--tg-button-text-color, #ffffff);
+            --tg-theme-hint-color: var(--tg-hint-color, #aaaaaa);
+            --tg-theme-secondary-bg-color: var(--tg-secondary-bg-color, #f0f0f0);
+            
+            font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            color: var(--tg-theme-text-color);
+        }
+
+        /* Убираем отступы, делаем фон 'вторичным' */
+        body {
+            background-color: var(--tg-theme-secondary-bg-color);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            padding: 12px;
+            padding-top: env(safe-area-inset-top, 12px);
+            padding-bottom: env(safe-area-inset-bottom, 12px);
+            box-sizing: border-box; 
+        }
+
+        h1 {
+            text-align: left;
+            margin-top: 0;
+            margin-bottom: 0;
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .file-uploader {
+            display: none;
+        }
+        
+        .file-label {
+            display: block;
+            background-color: var(--tg-theme-button-color);
+            color: var(--tg-theme-button-text-color);
+            text-align: center;
+            padding: 14px 20px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 16px;
+            transition: opacity 0.2s ease;
+        }
+        .file-label:hover {
+            opacity: 0.85;
+        }
+        
+        .file-label-secondary {
+             background-color: var(--tg-theme-hint-color);
+             color: var(--tg-theme-text-color);
+        }
+
+  
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            padding: 12px;
+
+            background-color: var(--tg-theme-bg-color);
+            border-radius: 12px;
+        }
+        
+        .section-header {
+            font-size: 20px;
+            font-weight: 600;
+            margin: 0;
+        }
+        
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .control-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            /* Разделители в стиле iOS 
+            */
+            border-bottom: 1px solid var(--tg-theme-secondary-bg-color);
+            padding: 8px 0;
+        }
+        .control-row:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+        
+        .control-row label {
+            font-size: 16px;
+        }
+        
+        input[type="text"] {
+            width: 100%;
+            font-size: 16px;
+            padding: 12px;
+            border-radius: 8px;
+            border: none;
+            background-color: var(--tg-theme-secondary-bg-color);
+            color: var(--tg-theme-text-color);
+            box-sizing: border-box;
+        }
+
+        .aspect-ratio-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 8px;
+        }
+        
+        .aspect-btn {
+            padding: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            border: 2px solid var(--tg-theme-hint-color);
+            background-color: transparent;
+            color: var(--tg-theme-text-color);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .aspect-btn.active {
+            background-color: var(--tg-theme-button-color);
+            color: var(--tg-theme-button-text-color);
+            border-color: var(--tg-theme-button-color);
+        }
+
+
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 16px;
+        }
+        
+        input[type="color"] {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%; /* Круглые пикеры */
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+        }
+        input[type="color"]::-webkit-color-swatch-wrapper {
+            padding: 0;
+            border-radius: 50%;
+            border: 1px solid var(--tg-theme-hint-color);
+        }
+        input[type="color"]::-webkit-color-swatch {
+            border: none;
+            border-radius: 50%;
+        }
+
+        input[type="range"] {
+            width: 50%;
+            -webkit-appearance: none;
+            appearance: none;
+            height: 8px;
+            background: var(--tg-theme-secondary-bg-color);
+            border-radius: 4px;
+            outline: none;
+            padding: 0;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            background: #ffffff;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+            border: 1px solid #ddd;
+        }
+
+
+        #previewCanvas {
+            width: 100%;
+            height: auto;
+            border-radius: 12px;
+            background-color: var(--tg-theme-bg-color);
+            border: 1px dashed var(--tg-theme-hint-color);
+        }
+
+        #downloadLink {
+            display: none;
+            text-align: center;
+            padding: 14px 20px;
+            background-color: #28a745;
+            color: white;
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 16px;
+            transition: background-color 0.2s ease;
+        }
+        #downloadLink:hover {
+            background-color: #218838;
+        }
+
+        #loader {
+            text-align: center;
+            font-size: 16px;
+            color: var(--tg-theme-hint-color);
+            display: none;
+            padding: 20px;
+        }
+        
+        #error {
+            text-align: center;
+            color: #dc3545;
+            background-color: var(--tg-theme-bg-color);
+            padding: 12px;
+            border-radius: 12px;
+            display: none;
+            font-weight: 500;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Post My Bike Route 🚲</h1>
+        
+        <p id="error">Ошибка: Не удалось прочитать файл. Убедитесь, что это .gpx</p>
+
+        <!-- Шаг 1: Загрузка GPX -->
+        <label for="gpxUploader" class="file-label">1. Выберите .gpx файл</label>
+        <input type="file" id="gpxUploader" class="file-uploader" accept=".gpx">
+
+        <!-- Шаг 2: Настройка Фона -->
+        <div class="controls">
+            <h2 class="section-header">Настройка Фона</h2>
+            
+            <div class="control-row">
+                <label for="bgColor">Цвет фона</label>
+                <input type="color" id="bgColor" value="#1a1a1a">
+            </div>
+            
+            <label for="bgUploader" class="file-label file-label-secondary">Загрузить свое изображение</label>
+            <input type="file" id="bgUploader" class="file-uploader" accept="image/*">
+            
+            <div class="control-group" style="gap: 16px; padding-top: 8px;">
+                <div class="control-row">
+                    <label for="bgBlur">Размытие</label>
+                    <input type="range" id="bgBlur" min="0" max="20" value="0">
+                </div>
+                <div class="control-row">
+                    <label for="bgDarkening">Затемнение</label>
+                    <input type="range" id="bgDarkening" min="0" max="100" value="40">
+                </div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <h2 class="section-header">Настройка Дизайна</h2>
+
+            <div class="control-group">
+                <label for="titleInput">Заголовок</label>
+                <input type="text" id="titleInput" placeholder="Например: Утренняя пробежка">
+            </div>
+
+            <div class="control-group">
+                <label>Соотношение сторон</label>
+                <div class="aspect-ratio-group">
+                    <button class="aspect-btn active" data-aspect="9:16">Stories (9:16)</button>
+                    <button class="aspect-btn" data-aspect="1:1">Квадрат (1:1)</button>
+                    <button class="aspect-btn" data-aspect="4:3">Пост (4:3)</button>
+                </div>
+            </div>
+
+            <div class="control-row">
+                <label for="routeColor">Цвет маршрута</label>
+                <input type="color" id="routeColor" value="#FFA500">
+            </div>
+            <div class="control-row">
+                <label for="lineWidth">Толщина</label>
+                <input type="range" id="lineWidth" min="1" max="15" value="5">
+            </div>
+             
+            <div class="control-group">
+                <label>Отображаемые метрики:</label>
+                <div class="checkbox-group">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="showDistance" checked>
+                        <label for="showDistance">Дистанция</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="showTime" checked>
+                        <label for="showTime">Время</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="showElevation" checked>
+                        <label for="showElevation">Набор высоты</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="showSpeed" checked>
+                        <label for="showSpeed">Ср. скорость</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        
+        <div id="loader">Обработка маршрута...</div>
+
+     
+        <canvas id="previewCanvas"></canvas>
+
+        <a id="downloadLink" download="my_route.png">Скачать изображение</a>
+    </div>
+
+    <script>
+
+        // Элементы DOM
+        const uploader = document.getElementById('gpxUploader');
+        const bgUploader = document.getElementById('bgUploader');
+        const canvas = document.getElementById('previewCanvas');
+        const ctx = canvas.getContext('2d');
+        const downloadLink = document.getElementById('downloadLink');
+        const loader = document.getElementById('loader');
+        const errorMsg = document.getElementById('error');
+        
+        // Элементы управления
+        const bgColorPicker = document.getElementById('bgColor');
+        const bgBlurSlider = document.getElementById('bgBlur');
+        const bgDarkeningSlider = document.getElementById('bgDarkening');
+        
+        const titleInput = document.getElementById('titleInput');
+        const aspectButtons = document.querySelectorAll('.aspect-btn');
+        
+        const routeColorPicker = document.getElementById('routeColor');
+        const lineWidthSlider = document.getElementById('lineWidth');
+        
+        const showDistanceCheck = document.getElementById('showDistance');
+        const showTimeCheck = document.getElementById('showTime');
+        const showElevationCheck = document.getElementById('showElevation');
+        const showSpeedCheck = document.getElementById('showSpeed');
+
+        // Хранилище данных
+        let gpxData = null; // { points: [], elevation: [], time: [] }
+        let backgroundImage = null;
+        let currentAspect = '9:16'; // Формат по умолчанию
+
+        // --- Слушатели событий ---
+
+        // 1. При выборе GPX
+        uploader.addEventListener('change', handleGpxSelect);
+        
+        // 2. При выборе Фона
+        bgUploader.addEventListener('change', handleBgImageSelect);
+        
+        // 3. Смена соотношения сторон
+        aspectButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                // Снимаем класс 'active' со всех
+                aspectButtons.forEach(b => b.classList.remove('active'));
+                // Добавляем класс 'active' нажатой
+                btn.classList.add('active');
+                currentAspect = btn.dataset.aspect;
+                
+                // Перерисовываем, если GPX уже есть
+                if (gpxData) {
+                    drawCanvas(gpxData);
+                }
+            });
+        });
+
+        
+        const controls = [
+            bgColorPicker, bgBlurSlider, bgDarkeningSlider, 
+            titleInput, routeColorPicker, lineWidthSlider,
+            showDistanceCheck, showTimeCheck, showElevationCheck, showSpeedCheck
+        ];
+        
+        controls.forEach(el => {
+            el.addEventListener('input', () => {
+                if (gpxData) {
+                    // Используем requestAnimationFrame для плавности на слайдерах
+                    requestAnimationFrame(() => drawCanvas(gpxData));
+                }
+            });
+        });
+
+        // --- Функции Загрузки ---
+
+        function handleGpxSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            loader.style.display = 'block';
+            errorMsg.style.display = 'none';
+            downloadLink.style.display = 'none';
+            gpxData = null; // Сброс
+
+            const reader = new FileReader();
+
+            reader.onload = (e) => {
+                try {
+                    const gpxText = e.target.result;
+                    gpxData = parseGPX(gpxText); // Парсим GPX
+                    
+                    if (!gpxData || gpxData.points.length === 0) {
+                        throw new Error('В GPX файле не найдено точек.');
+                    }
+                    
+                    drawCanvas(gpxData); // Рисуем на холсте
+                    
+                    loader.style.display = 'none';
+                } catch (err) {
+                    console.error(err);
+                    loader.style.display = 'none';
+                    errorMsg.style.display = 'block';
+                    gpxData = null;
+                }
+            };
+            
+            reader.onerror = () => {
+                 loader.style.display = 'none';
+                 errorMsg.style.display = 'block';
+            };
+
+            reader.readAsText(file);
+        }
+
+        function handleBgImageSelect(event) {
+            const file = event.target.files[0];
+            if (!file) {
+                backgroundImage = null;
+                if (gpxData) drawCanvas(gpxData);
+                return;
+            };
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                backgroundImage = new Image();
+                backgroundImage.onload = () => {
+                    if (gpxData) {
+                        drawCanvas(gpxData);
+                    }
+                };
+                backgroundImage.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+       
+        function parseGPX(gpxText) {
+            const parser = new DOMParser();
+            const xmlDoc = parser.parseFromString(gpxText, "text/xml");
+            
+            if (xmlDoc.getElementsByTagName("parsererror").length) {
+                throw new Error("Ошибка парсинга XML.");
+            }
+
+            const points = [];
+            const elevation = [];
+            const time = [];
+            
+            const trkpts = xmlDoc.querySelectorAll('trkpt');
+            
+            trkpts.forEach(pt => {
+                const lat = parseFloat(pt.getAttribute('lat'));
+                const lon = parseFloat(pt.getAttribute('lon'));
+                
+                if (isNaN(lat) || isNaN(lon)) return;
+                
+                points.push({ lat, lon });
+                
+                const eleNode = pt.querySelector('ele');
+                if (eleNode) {
+                    elevation.push(parseFloat(eleNode.textContent));
+                }
+                
+                const timeNode = pt.querySelector('time');
+                if (timeNode) {
+                    time.push(new Date(timeNode.textContent));
+                }
+            });
+            
+            return { points, elevation, time };
+        }
+
+       
+        function drawCanvas(data) {
+            const { points, elevation, time } = data;
+        
+            const bounds = calculateBounds(points);
+            
+            // --- 0. Настройка холста (Соотношение сторон) ---
+            // Базовая ширина 1080px (для 1:1 и 9:16)
+            // Базовая высота 1200px (для 4:3)
+            
+            switch (currentAspect) {
+                case '1:1':
+                    canvas.width = 1080;
+                    canvas.height = 1080;
+                    break;
+                case '4:3':
+                    canvas.width = 1200;
+                    canvas.height = 900;
+                    break;
+                case '9:16':
+                default:
+                    canvas.width = 900;
+                    canvas.height = 1600;
+                    break;
+            }
+
+            // Настройки из UI
+            const bgColor = bgColorPicker.value;
+            const routeColor = routeColorPicker.value;
+            const lineWidth = parseInt(lineWidthSlider.value, 10);
+            const title = titleInput.value || '';
+            
+            const blur = parseInt(bgBlurSlider.value, 10);
+            const darkening = parseInt(bgDarkeningSlider.value, 10);
+            
+            // Отступы (padding) внутри холста
+            const padding = Math.min(canvas.width, canvas.height) * 0.1; // 10%
+
+            // --- 1. Очистка и фон (Сплошной цвет) ---
+            ctx.fillStyle = bgColor;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // --- 2. Отрисовка ФОНОВОГО ИЗОБРАЖЕНИЯ (если есть) ---
+            if (backgroundImage) {
+                ctx.filter = `blur(${blur}px) brightness(${100 - darkening}%)`;
+                
+                const canvasAspect = canvas.width / canvas.height;
+                const imgAspect = backgroundImage.width / backgroundImage.height;
+                
+                let sx = 0, sy = 0, sWidth = backgroundImage.width, sHeight = backgroundImage.height;
+                
+                if (imgAspect > canvasAspect) {
+                    sWidth = backgroundImage.height * canvasAspect;
+                    sx = (backgroundImage.width - sWidth) / 2;
+                } else {
+                    sHeight = backgroundImage.width / canvasAspect;
+                    sy = (backgroundImage.height - sHeight) / 2;
+                }
+
+                ctx.drawImage(backgroundImage, sx, sy, sWidth, sHeight, 0, 0, canvas.width, canvas.height);
+                
+                ctx.filter = 'none';
+            }
+
+
+            // --- 3. Расчет масштабирования (Нормализация) ---
+            // Оставляем 30% внизу для Заголовка и Метрик
+            const routeCanvasHeight = canvas.height * 0.65;
+            const canvasWidth = canvas.width - padding * 2;
+            const canvasHeight = routeCanvasHeight - padding * 2;
+            
+            const routeWidth = bounds.maxLon - bounds.minLon;
+            const routeHeight = bounds.maxLat - bounds.minLat;
+
+            const latCorrection = Math.cos(rad(bounds.minLat + routeHeight / 2));
+            // Проверка на 0, если точки совпадают
+            const routeAspect = (routeHeight === 0) ? 1 : (routeWidth * latCorrection) / routeHeight;
+            const canvasAspect = canvasWidth / canvasHeight;
+
+            let scale;
+            if (routeAspect > canvasAspect || routeHeight === 0) {
+                scale = canvasWidth / (routeWidth * latCorrection);
+            } else {
+                scale = canvasHeight / routeHeight;
+            }
+            // Если scale бесконечный (1 точка), делаем его 0
+            if (!isFinite(scale)) scale = 0;
+
+            const centeredX = padding + (canvasWidth - routeWidth * latCorrection * scale) / 2;
+            const centeredY = padding + (canvasHeight - routeHeight * scale) / 2;
+
+            function normalize(point) {
+                const x = centeredX + (point.lon - bounds.minLon) * latCorrection * scale;
+                const y = centeredY + (bounds.maxLat - point.lat) * scale;
+                return [x, y];
+            }
+
+            // --- 4. Отрисовка линии ---
+            ctx.beginPath();
+            ctx.strokeStyle = routeColor;
+            ctx.lineWidth = lineWidth;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            
+            points.forEach((point, index) => {
+                const [x, y] = normalize(point);
+                if (index === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            });
+            
+            ctx.stroke();
+
+            // --- 5. Расчет и Отрисовка Метрик и Заголовка ---
+            const metrics = [];
+            const textColor = backgroundImage ? '#FFFFFF' : getContrastingTextColor(bgColor);
+
+            // Дистанция
+            const totalDistance = calculateTotalDistance(points);
+            if (showDistanceCheck.checked && totalDistance > 0) {
+                metrics.push({ label: 'ДИСТАНЦИЯ', value: (totalDistance / 1000).toFixed(2), unit: 'км' });
+            }
+            
+            // Время
+            const totalTime = (time.length > 1) ? (time[time.length - 1] - time[0]) / 1000 : 0;
+            if (showTimeCheck.checked && totalTime > 0) {
+                metrics.push({ label: 'ВРЕМЯ', value: formatTime(totalTime), unit: '' });
+            }
+
+            // Набор высоты
+            const elevationGain = (elevation.length > 1) ? calculateElevationGain(elevation) : 0;
+            if (showElevationCheck.checked && elevationGain > 0) {
+                metrics.push({ label: 'НАБОР ВЫСОТЫ', value: elevationGain.toFixed(0), unit: 'м' });
+            }
+            
+            // Средняя скорость
+            if (showSpeedCheck.checked && totalDistance > 0 && totalTime > 0) {
+                const speedKmh = (totalDistance / 1000) / (totalTime / 3600);
+                metrics.push({ label: 'СР. СКОРОСТЬ', value: speedKmh.toFixed(1), unit: 'км/ч' });
+            }
+
+            // Отрисовка (снизу вверх)
+            
+            // Позиция Y для начала метрик (снизу)
+            const metricsBlockY = canvas.height - padding;
+            // Позиция Y для Заголовка
+            const titleY = canvas.height - padding - (Math.ceil(metrics.length / 2) * 80) - 20;
+
+            drawMetrics(metrics, textColor, padding, metricsBlockY);
+            
+            if (title) {
+                drawTitle(title, textColor, padding, titleY);
+            }
+            
+            // --- 6. Обновление ссылки на скачивание ---
+            downloadLink.href = canvas.toDataURL('image/png');
+            downloadLink.style.display = 'block';
+        }
+
+        /** Отрисовка Заголовка */
+        function drawTitle(title, textColor, padding, y) {
+            ctx.fillStyle = textColor;
+            ctx.font = 'bold 72px ' + getComputedStyle(document.body).fontFamily;
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'bottom';
+            ctx.fillText(title, padding, y);
+        }
+
+        /** Отрисовка блока метрик */
+        function drawMetrics(metrics, textColor, padding, startY) {
+            ctx.fillStyle = textColor;
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'bottom';
+
+            const colWidth = (canvas.width - padding * 2) / 2;
+            
+            metrics.forEach((metric, index) => {
+                const x = padding + (index % 2) * colWidth;
+                // Рисуем снизу вверх
+                const y = startY - Math.floor(index / 2) * 85; // 85px высота блока
+                
+                // Метка (ДИСТАНЦИЯ)
+                ctx.font = 'bold 28px ' + getComputedStyle(document.body).fontFamily;
+                ctx.globalAlpha = 0.7;
+                ctx.fillText(metric.label, x, y - 50); // Метка над значением
+                ctx.globalAlpha = 1.0;
+                
+                // Значение (123.7)
+                ctx.font = 'bold 48px ' + getComputedStyle(document.body).fontFamily;
+                const valueWidth = ctx.measureText(metric.value).width;
+                ctx.fillText(metric.value, x, y);
+                
+                // Единица (км)
+                ctx.font = 'bold 28px ' + getComputedStyle(document.body).fontFamily;
+                ctx.fillText(metric.unit, x + valueWidth + 10, y);
+            });
+        }
+
+
+        function rad(deg) {
+             return deg * (Math.PI / 180);
+        }
+
+        function calculateBounds(points) {
+            let minLat = Infinity, minLon = Infinity, maxLat = -Infinity, maxLon = -Infinity;
+            points.forEach(p => {
+                if (p.lat < minLat) minLat = p.lat;
+                if (p.lon < minLon) minLon = p.lon;
+                if (p.lat > maxLat) maxLat = p.lat;
+                if (p.lon > maxLon) maxLon = p.lon;
+            });
+            return { minLat, minLon, maxLat, maxLon };
+        }
+
+        function calculateTotalDistance(points) {
+            let totalDistance = 0;
+            for (let i = 0; i < points.length - 1; i++) {
+                totalDistance += haversine(points[i], points[i+1]);
+            }
+            return totalDistance;
+        }
+
+        function haversine(p1, p2) {
+            const R = 6371e3; // метры
+            const dLat = rad(p2.lat - p1.lat);
+            const dLon = rad(p2.lon - p1.lon);
+            const lat1 = rad(p1.lat);
+            const lat2 = rad(p2.lat);
+
+            const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                      Math.sin(dLon / 2) * Math.sin(dLon / 2) * Math.cos(lat1) * Math.cos(lat2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            return R * c;
+        }
+        
+        function calculateElevationGain(elevation) {
+            let gain = 0;
+            for (let i = 1; i < elevation.length; i++) {
+                // Сглаживание шума (порог 0.5 метра)
+                const diff = elevation[i] - elevation[i-1];
+                if (diff > 0.5) {
+                    gain += diff;
+                }
+            }
+            return gain;
+        }
+        
+        function formatTime(totalSeconds) {
+            const hours = Math.floor(totalSeconds / 3600);
+            totalSeconds %= 3600;
+            const minutes = Math.floor(totalSeconds / 60);
+            const seconds = Math.floor(totalSeconds % 60);
+            
+            const pad = (num) => num.toString().padStart(2, '0');
+            
+            if (hours > 0) {
+                return `${hours}:${pad(minutes)}:${pad(seconds)}`;
+            }
+            return `${minutes}:${pad(seconds)}`;
+        }
+        
+        function getContrastingTextColor(hexColor) {
+            const hex = hexColor.replace('#', '');
+            const r = parseInt(hex.substring(0, 2), 16);
+            const g = parseInt(hex.substring(2, 4), 16);
+            const b = parseInt(hex.substring(4, 6), 16);
+            const yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
+            return (yiq < 128) ? '#FFFFFF' : '#000000';
+        }
+        
+        // --- Инициализация Telegram Web App ---
+        try {
+            if (window.Telegram && window.Telegram.WebApp) {
+                window.Telegram.WebApp.ready();
+                // Расширяем приложение на всю высоту
+                window.Telegram.WebApp.expand();
+            }
+        } catch (e) {
+            console.warn("Telegram Web App script not found or failed to init.");
+        }
+        
+        // --- Инициализация холста при загрузке ---
+        // Чтобы холст не был пустым до загрузки GPX
+        function initCanvas() {
+            // Устанавливаем дефолтный аспект
+            document.querySelector('.aspect-btn[data-aspect="9:16"]').click();
+            
+            ctx.fillStyle = bgColorPicker.value;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.fillStyle = getContrastingTextColor(bgColorPicker.value);
+            ctx.font = '24px ' + getComputedStyle(document.body).fontFamily;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('Загрузите GPX, чтобы увидеть превью', canvas.width / 2, canvas.height / 2);
+        }
+        
+        window.onload = initCanvas;
+
+    </script>
+</body>
+</html>
+
