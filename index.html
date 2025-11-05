@@ -353,8 +353,8 @@
         }
 
     </style>
-    <!-- Подключаем скрипт Telegram -->
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <!-- Подключаем скрипт Telegram (БОЛЬШЕ НЕ НУЖЕН) -->
+    <!-- <script src="https://telegram.org/js/telegram-web-app.js"></script> -->
 </head>
 <body>
 
@@ -473,7 +473,7 @@
 
         <canvas id="previewCanvas"></canvas>
 
-        <button id="saveButton">Отправить боту</button>
+        <button id="saveButton">Сохранить изображение</button>
     </div>
 
     <!-- Модальное окно (оставлено, если понадобится) -->
@@ -487,7 +487,8 @@
 
 
     <script>
-        // --- Инициализация Telegram Web App ---
+        // --- Инициализация Telegram Web App (БОЛЬШЕ НЕ НУЖНА) ---
+        /*
         let tg;
         try {
             tg = window.Telegram.WebApp;
@@ -498,6 +499,7 @@
         } catch (e) {
             console.warn("Telegram Web App script not found or failed to init.");
         }
+        */
 
         const uploader = document.getElementById('gpxUploader');
         const bgUploader = document.getElementById('bgUploader');
@@ -539,6 +541,25 @@
         let backgroundImage = null;
         let currentAspect = '9:16';
         let currentRouteColor = '#FF6B6B'; 
+
+        // 1. При выборе GPX
+        uploader.addEventListener('change', handleGpxSelect);
+        
+        // 2. При выборе Фона
+        bgUploader.addEventListener('change', handleBgImageSelect);
+
+        // 3. Смена соотношения сторон (ВОССТАНОВЛЕНО)
+        aspectButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                aspectButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentAspect = btn.dataset.aspect;
+                
+                if (gpxData) {
+                    drawCanvas(gpxData);
+                }
+            });
+        });
 
         // 4. Смена цвета маршрута (кнопки)
         colorButtons.forEach(btn => {
@@ -585,7 +606,14 @@
         });
         
         // --- ИЗМЕНЕННАЯ ЛОГИКА КНОПКИ "СОХРАНИТЬ" ---
-        saveButton.addEventListener('click', handleSaveClick);
+        // (Возвращаем старую логику с модальным окном)
+        saveButton.addEventListener('click', () => {
+            if (!gpxData) return;
+            drawCanvas(gpxData); 
+            const dataURL = canvas.toDataURL('image/png');
+            modalImage.src = dataURL;
+            imageModal.style.display = 'flex';
+        });
         
         closeModal.addEventListener('click', () => {
             imageModal.style.display = 'none';
@@ -606,8 +634,8 @@
             });
         });
 
-        // --- НОВАЯ ФУНКЦИЯ ДЛЯ ОТПРАВКИ ---
-
+        // --- НОВАЯ ФУНКЦИЯ ДЛЯ ОТПРАВКИ (БОЛЬШЕ НЕ НУЖНА) ---
+        /*
         async function handleSaveClick() {
             if (!gpxData) return;
             
@@ -666,7 +694,7 @@
                 loader.style.display = 'none';
             }
         }
-
+        */
 
         // --- Функции Загрузки (без изменений) ---
 
